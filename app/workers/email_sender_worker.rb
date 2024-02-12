@@ -6,19 +6,29 @@ class EmailSenderWorker
     contact = Contact.find(contact_id)
     email_template = EmailTemplate.find(email_template_id)
 
-    # Example sending email logic (implement your email sending mechanism here)
-    # For example, using ActionMailer:
-    # MyMailer.send_email(contact.email, email_template).deliver_now
+    rendered_subject = render_erb(email_template.subject, contact)
+    rendered_body = render_erb(email_template.body, contact)
 
-    # Log the email sending attempt
+    # Implement your email sending logic here
+    # For example, sending an email with the rendered subject and body
+    send_email(contact.email, rendered_subject, rendered_body)
+
     EmailReceipt.create!(
       contact_id: contact_id,
       email_template_id: email_template_id,
       receipt_number: receipt_number,
-      status: 'sent' # or 'failed', based on the outcome of the sending process
+      status: 'pending'
     )
-  rescue StandardError => e
-    # Handle error, possibly updating the EmailReceipt with a 'failed' status
-    puts "Email sending failed: #{e.message}"
+  end
+
+  private
+
+  def render_erb(template, contact)
+    ERB.new(template).result_with_hash(name: contact.name)
+  end
+
+  def send_email(email, subject, body)
+    # Placeholder for email sending logic
+    puts "Sending email to: #{email} with subject: '#{subject}' and body: '#{body}'"
   end
 end
