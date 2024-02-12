@@ -8,3 +8,11 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
+
+# db/seeds.rb
+email_template = EmailTemplate.find_or_create_by(name: 'welcome') do |template|
+  template.subject = "Hi <%= name %> Welcome to Albert"
+  template.body = "Dear <%= name %>,\n\nSo glad to have you on board!"
+end
+
+puts "Created email template: #{email_template.name}"
