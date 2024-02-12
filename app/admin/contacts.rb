@@ -1,6 +1,4 @@
 ActiveAdmin.register Contact do
-
-ActiveAdmin.register Contact do
   # See permitted parameters documentation:
   # https://github.com/activeadmin/activeadmin/blob/master/docs/2-resource-customization.md#setting-up-strong-parameters
   #
@@ -30,6 +28,4 @@ ActiveAdmin.register Contact do
   collection_action :upload_csv, method: :get do
     render "admin/csv/upload_csv"
   end
-end
-
 end
