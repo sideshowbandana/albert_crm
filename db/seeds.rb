@@ -7,7 +7,15 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
-AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
+
+# if Rails.env.development?
+if ENV["ADMIN_EMAIL"]
+  AdminUser.find_or_create_by(email: ENV["ADMIN_EMAIL"]) do |admin|
+    admin.password = ENV["ADMIN_PASSWORD"]
+    admin.password_confirmation = ENV["ADMIN_PASSWORD"]
+  end
+end
+# end
 
 # db/seeds.rb
 email_template = EmailTemplate.find_or_create_by(name: 'welcome') do |template|
