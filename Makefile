@@ -13,6 +13,12 @@ build:
 
 # Run Docker containers
 run:
-	docker-compose up
+	docker-compose up -d
+
+stop:
+	docker-compose down
+
+rebuild: stop build run
+
 
 .PHONY: help build run
