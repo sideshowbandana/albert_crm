@@ -9,6 +9,20 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
 SET default_tablespace = '';
 
 --
@@ -107,7 +121,8 @@ CREATE TABLE public.contacts (
     state character varying,
     zip character varying,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    phone_number character varying
 );
 
 
@@ -139,9 +154,9 @@ CREATE TABLE public.email_receipts (
     contact_id bigint NOT NULL,
     email_template_id bigint NOT NULL,
     status character varying,
-    receipt_number integer,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    receipt_number uuid DEFAULT public.gen_random_uuid() NOT NULL
 );
 
 
@@ -333,10 +348,66 @@ CREATE UNIQUE INDEX index_admin_users_on_reset_password_token ON public.admin_us
 
 
 --
+-- Name: index_contacts_on_address; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_contacts_on_address ON public.contacts USING btree (address);
+
+
+--
+-- Name: index_contacts_on_city; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_contacts_on_city ON public.contacts USING btree (city);
+
+
+--
+-- Name: index_contacts_on_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_contacts_on_email ON public.contacts USING btree (email);
+
+
+--
+-- Name: index_contacts_on_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_contacts_on_name ON public.contacts USING btree (name);
+
+
+--
+-- Name: index_contacts_on_phone_number; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_contacts_on_phone_number ON public.contacts USING btree (phone_number);
+
+
+--
+-- Name: index_contacts_on_state; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_contacts_on_state ON public.contacts USING btree (state);
+
+
+--
+-- Name: index_contacts_on_zip; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_contacts_on_zip ON public.contacts USING btree (zip);
+
+
+--
 -- Name: index_email_receipts_on_contact_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_email_receipts_on_contact_id ON public.email_receipts USING btree (contact_id);
+
+
+--
+-- Name: index_email_receipts_on_contact_template_and_receipt; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_email_receipts_on_contact_template_and_receipt ON public.email_receipts USING btree (contact_id, email_template_id, receipt_number);
 
 
 --
@@ -369,6 +440,8 @@ ALTER TABLE ONLY public.email_receipts
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20240214231558'),
+('20240214204905'),
 ('20240212173827'),
 ('20240212172828'),
 ('20240212172826'),
