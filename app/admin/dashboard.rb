@@ -1,12 +1,22 @@
 # frozen_string_literal: true
 ActiveAdmin.register_page "Dashboard" do
-  menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
+  menu priority: 1, if: proc{ !current_admin_user.present? }, label: proc { I18n.t("active_admin.dashboard") }
+
+  controller do
+    skip_before_action :authenticate_active_admin_user, only: :index
+  end
+
+  action_item :login, if: proc{ !current_admin_user.present? }, only: :index do
+    link_to "Log In", new_admin_user_session_path
+  end
 
   content title: proc { I18n.t("active_admin.dashboard") } do
     div class: "blank_slate_container", id: "dashboard_default_message" do
       span class: "blank_slate" do
-        span I18n.t("active_admin.dashboard_welcome.welcome")
-        small I18n.t("active_admin.dashboard_welcome.call_to_action")
+        div do
+          image_tag("albert.png")
+        end
+        span "Welcome to Albert's Customer Relationship Manager"
       end
     end
 

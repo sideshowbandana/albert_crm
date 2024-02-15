@@ -1,4 +1,6 @@
 ActiveAdmin.register EmailTemplate do
+  menu if: proc{ current_admin_user.present? }
+
   filter :name
   filter :subject
   filter :body

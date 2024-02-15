@@ -1,4 +1,6 @@
 ActiveAdmin.register AdminUser do
+  menu if: proc{ current_admin_user.present? }
+
   permit_params :email, :password, :password_confirmation
 
   index do
