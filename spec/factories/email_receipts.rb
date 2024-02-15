@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :email_receipt do
-    contact { nil }
-    email_template { nil }
-    status { "MyString" }
-    receipt_number { 1 }
+    contact
+    email_template
+    status { EmailClient::EmailStatus::SENT }
+    receipt_number { nil }
   end
 end
