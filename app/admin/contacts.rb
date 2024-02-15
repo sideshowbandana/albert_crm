@@ -22,9 +22,22 @@ ActiveAdmin.register Contact do
 
   # POST action for processing the uploaded CSV
   collection_action :import_csv, method: :post do
-    # Process the CSV file
-    CsvProcessor.new(params.require(:contact).require(:csv_file)).process
-    redirect_to collection_path, notice: "Contacts have been uploaded."
+    uploaded_io = params.require(:contact).require(:csv_file)
+    # Construct the path with the shared volume directory
+    file_path = File.join("./user_data", "uploads", "#{SecureRandom.uuid}.csv")
+
+    # Ensure the 'uploads' directory exists
+    FileUtils.mkdir_p(File.dirname(file_path))
+
+    # Write the uploaded file to the shared volume
+    File.open(file_path, 'wb') do |file|
+      file.write(uploaded_io.read)
+    end
+
+    # Enqueue the worker with the path to the saved file
+    CsvProcessorWorker.perform_async(file_path)
+
+    redirect_to collection_path, notice: "Contacts upload has been enqueued."
   end
 
   # GET action to display the form for uploading CSV
