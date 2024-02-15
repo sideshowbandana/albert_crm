@@ -1,4 +1,9 @@
 ActiveAdmin.register EmailTemplate do
+  filter :name
+  filter :subject
+  filter :body
+  filter :created_at
+  filter :updated_at
 
   # See permitted parameters documentation:
   # https://github.com/activeadmin/activeadmin/blob/master/docs/2-resource-customization.md#setting-up-strong-parameters
@@ -15,19 +20,24 @@ ActiveAdmin.register EmailTemplate do
     permitted
   end
 
-  member_action :send_emails, method: :post do
-    email_template = EmailTemplate.find(params[:id])
-    Contact.find_each do |contact|
-      # Ensure no duplicate job is queued for the same contact with the same email template and receipt number
-      unless EmailReceipt.exists?(contact: contact, email_template: email_template, receipt_number: some_logic_to_define_receipt_number)
-        EmailSenderWorker.perform_async(contact.id, email_template.id, some_logic_to_define_receipt_number)
+
+  batch_action :bulk_email, confirm: "Are you sure you want to send this email template to all contacts?" do |ids|
+    # Iterate over each selected email template
+    counter = 0
+    ids.each do |email_template_id|
+      # Fetch each contact and queue the email sending job
+      Contact.where.not(
+        id: EmailReceipt.select(:contact_id).where(
+          email_template_id: email_template_id
+        )
+      ).find_each do |contact|
+        counter += 1
+        EmailSenderWorker.perform_async(contact.id, email_template_id)
       end
     end
-    redirect_to resource_path(email_template), notice: "Emails are being sent."
-  end
 
-  action_item :send_emails, only: :show do
-    link_to 'Send Emails', action: 'send_emails', method: :post
+    # Redirect to the index page with a notice
+    redirect_to collection_path, notice: "#{counter} emails are being sent to contacts."
   end
 
 end
