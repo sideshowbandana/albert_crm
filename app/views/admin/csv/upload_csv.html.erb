@@ -1,0 +1,7 @@
+<%= form_for :contact, url: import_csv_admin_contacts_path, html: { multipart: true } do |f| %>
+  <div class="input">
+    <%= f.label :csv_file, "CSV File" %>
+    <%= f.file_field :csv_file %>
+  </div>
+  <%= f.submit "Upload" %>
+<% end %>
