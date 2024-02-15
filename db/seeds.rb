@@ -9,10 +9,13 @@
 #   end
 
 # if Rails.env.development?
-if ENV["ADMIN_EMAIL"]
-  AdminUser.find_or_create_by(email: ENV["ADMIN_EMAIL"]) do |admin|
-    admin.password = ENV["ADMIN_PASSWORD"]
-    admin.password_confirmation = ENV["ADMIN_PASSWORD"]
+if ENV["ADMIN_EMAIL"] || Rails.env.development?
+  email = ENV.fetch("ADMIN_EMAIL", "admin@example.com")
+  AdminUser.find_or_create_by(email: email) do |admin|
+    pw = ENV.fetch("ADMIN_PASSWORD", "password")
+    admin.password = pw
+    admin.password_confirmation = pw
+    puts "created admin: #{email}"
   end
 end
 # end
@@ -21,6 +24,5 @@ end
 email_template = EmailTemplate.find_or_create_by(name: 'welcome') do |template|
   template.subject = "Hi <%= name %> Welcome to Albert"
   template.body = "Dear <%= name %>,\n\nSo glad to have you on board!"
+  puts "Created email template: #{email_template.name}"
 end
-
-puts "Created email template: #{email_template.name}"
