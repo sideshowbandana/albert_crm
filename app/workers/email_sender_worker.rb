@@ -1,34 +1,56 @@
-# app/workers/email_sender_worker.rb
+require 'erb'
+
 class EmailSenderWorker
   include Sidekiq::Worker
 
-  def perform(contact_id, email_template_id, receipt_number)
-    contact = Contact.find(contact_id)
-    email_template = EmailTemplate.find(email_template_id)
+  EXPONENTIAL_BACKOFF_BASE = 5
 
-    rendered_subject = render_erb(email_template.subject, contact)
-    rendered_body = render_erb(email_template.body, contact)
+  def perform(contact_id, email_template_id, backoff_exponent = 0)
+    begin
+      contact = Contact.find(contact_id)
+      email_template = EmailTemplate.find(email_template_id)
+      # Check if the contact has a 'bounced' status for any email, skip sending
+      return if EmailReceipt.where(contact_id: contact_id, status: 'bounced').exists?
 
-    # Implement your email sending logic here
-    # For example, sending an email with the rendered subject and body
-    send_email(contact.email, rendered_subject, rendered_body)
+      # Check if the contact has already received an email for this template and receipt number
+      return if EmailReceipt.exists?(contact_id: contact_id, email_template: email_template_id, status: EmailClient::EmailStatus::DELIVERED)
 
-    EmailReceipt.create!(
-      contact_id: contact_id,
-      email_template_id: email_template_id,
-      receipt_number: receipt_number,
-      status: 'pending'
-    )
+      rendered_subject = render_erb(email_template.subject, contact)
+      rendered_body = render_erb(email_template.body, contact)
+
+      # Simulate sending an email
+      response = send_email(contact.email, rendered_subject, rendered_body)
+
+      # Record the email attempt with its status
+      EmailReceipt.create!(
+        contact_id: contact_id,
+        email_template_id: email_template_id,
+        receipt_number: response[:id],
+        status: response[:status]
+      )
+
+      if response[:status] == EmailClient::EmailStatus::BOUNCED && backoff_exponent < 3
+        backoff_exponent += 1
+        EmailSenderWorker.perform_in(EXPONENTIAL_BACKOFF_BASE**backoff_exponent, contact_id, email_template_id, backoff_exponent)
+      end
+    rescue => e
+      Rails.logger.error("Unable to send email contact_id: #{contact_id} email_template_id: #{email_template_id}")
+      Rails.logger.error(e.message)
+      e.backtrace.each do |line|
+        Rails.logger.error("    #{line}")
+      end
+    end
   end
 
   private
 
   def render_erb(template, contact)
-    ERB.new(template).result_with_hash(name: contact.name)
+    ERB.new(template).result_with_hash(name: contact.name).gsub("\n", "<br>").html_safe
   end
 
   def send_email(email, subject, body)
-    # Placeholder for email sending logic
-    puts "Sending email to: #{email} with subject: '#{subject}' and body: '#{body}'"
+    # Simulated logic for sending an email
+    client = EmailClient.new
+    client.send_email(subject, body, email)
   end
 end
