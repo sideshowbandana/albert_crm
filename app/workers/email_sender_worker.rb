@@ -6,6 +6,7 @@ class EmailSenderWorker
   EXPONENTIAL_BACKOFF_BASE = 5
 
   def perform(contact_id, email_template_id, backoff_exponent = 0)
+    backoff_exponent = backoff_exponent.to_i
     begin
       contact = Contact.find(contact_id)
       email_template = EmailTemplate.find(email_template_id)
