@@ -24,7 +24,7 @@ ActiveAdmin.register Contact do
   collection_action :import_csv, method: :post do
     uploaded_io = params.require(:contact).require(:csv_file)
     # Construct the path with the shared volume directory
-    file_path = File.join("./user_data", "uploads", "#{SecureRandom.uuid}.csv")
+    file_path = File.join(Rails.root, "tmp", "storage", "user_data", "#{SecureRandom.uuid}.csv")
 
     # Ensure the 'uploads' directory exists
     FileUtils.mkdir_p(File.dirname(file_path))
