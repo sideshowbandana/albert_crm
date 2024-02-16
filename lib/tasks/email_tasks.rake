@@ -2,27 +2,28 @@
 
 namespace :email do
   desc "Send email to contacts from a CSV file"
-  task :send_to_csv, [:csv_file, :email_template_id] => :environment do |t, args|
+  task send_to_csv: :environment do
     require 'csv'
+    csv_file = "input.csv"
+    template_name = ENV["EMAIL_TEMPLATE_NAME"]
+    async = ENV["ASYNC"]
 
     # Ensure arguments are provided
-    if args[:csv_file].nil? || args[:email_template_id].nil?
-      puts "Usage: rake email:send_to_csv[csv_file_path,email_template_id]"
+    if csv_file.blank? || template_name.blank?
+      puts "Usage: CSV_FILE=file_path EMAIL_TEMPLATE_NAME=welcome rake email:send_to_csv"
       next
     end
 
-    email_template_id = args[:email_template_id]
-    receipt_number = Time.now.to_i # Example way to generate a unique receipt number
+    unless email_template_id = EmailTemplate.find_by(name: template_name)&.id
+      puts "No Email Template Named: #{template_name}"
+      next
+    end
 
-    CSV.foreach(args[:csv_file], headers: true) do |row|
-      contact = Contact.upsert(row)
-
-      if contact.present?
-        # Enqueue the email to be sent
-        EmailSenderWorker.perform_async(contact.id, email_template_id, receipt_number)
-        puts "Enqueued email for: #{email}"
+    CsvProcessor.new(csv_file).process.each do |contact|
+      if async
+        EmailSenderWorker.perform_async(contact["id"], email_template_id, SecureRandom.uuid)
       else
-        puts "Contact not found for email: #{email}"
+        EmailSenderWorker.new.perform(contact["id"], email_template_id, SecureRandom.uuid)
       end
     end
   end
