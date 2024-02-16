@@ -1,6 +1,8 @@
 ActiveAdmin.register EmailReceipt do
   menu if: proc{ current_admin_user.present? }
 
+  actions :all, except: [:new]
+
   # Customizing the index table
   index do
     selectable_column
