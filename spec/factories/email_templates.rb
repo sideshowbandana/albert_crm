@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :email_template do
-    name { "MyString" }
-    subject { "MyString" }
-    body { "MyText" }
+    name { "Welcome Email" }
+    subject { "Welcome to Our Service!" }
+    body { "This is the body of the email." }
   end
 end
