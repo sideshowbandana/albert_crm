@@ -14,12 +14,7 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/albert_crm
-      - type: volume
-        source: shared_data
-        target: ./user_data
-        volume:
-          nocopy: true
+      - user_data:/albert_crm/tmp/storage/user_data
     ports:
       - "3000:3000"
     depends_on:
@@ -31,15 +26,9 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/albert_crm
-      - type: volume
-        source: shared_data
-        target: ./user_data
-        read_only: true
-        volume:
-          nocopy: true
+      - user_data:/albert_crm/tmp/storage/user_data:ro
     depends_on:
       - db
       - redis
 volumes:
-  shared_data:
+  user_data:
