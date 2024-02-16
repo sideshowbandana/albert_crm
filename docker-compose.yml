@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   db:
     image: postgres
@@ -14,7 +14,7 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/albert_crm
+      - user_data:/albert_crm/tmp/storage/user_data
     ports:
       - "3000:3000"
     depends_on:
@@ -26,7 +26,9 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/albert_crm
+      - user_data:/albert_crm/tmp/storage/user_data:ro
     depends_on:
       - db
       - redis
+volumes:
+  user_data:

@@ -16,13 +16,13 @@ RUN wget https://github.com/postmodern/ruby-install/releases/download/v0.9.3/rub
   && make install
 
 # Install Ruby 3.3.0 with the https://github.com/ruby/ruby/pull/9371 patch
-RUN ruby-install -p https://github.com/ruby/ruby/pull/9371.diff ruby 3.3.0
+RUN ruby-install -p https://github.com/ruby/ruby/pull/9371.diff ruby 3.3.0 && rm -rf ruby-install-*
 
 # Make the Ruby binary available on the PATH
 ENV PATH="/opt/rubies/ruby-3.3.0/bin:${PATH}"
 
 # Rails app lives here
-WORKDIR /rails
+WORKDIR /albert_crm
 
 # Set production environment
 ENV RAILS_ENV="production" \
@@ -64,11 +64,16 @@ RUN apt-get update -qq && \
 
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
-COPY --from=build /rails /rails
+COPY --from=build /albert_crm /albert_crm
+
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
+
+RUN mkdir -p /albert_crm/tmp/storage/user_data && \
+    chown -R rails:rails /albert_crm/tmp/storage/user_data
+
 USER rails:rails
 
 # Entrypoint prepares the database.

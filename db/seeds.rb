@@ -24,5 +24,5 @@ end
 email_template = EmailTemplate.find_or_create_by(name: 'welcome') do |template|
   template.subject = "Hi <%= name %> Welcome to Albert"
   template.body = "Dear <%= name %>,\n\nSo glad to have you on board!"
-  puts "Created email template: #{email_template.name}"
+  puts "Created email template: #{template.name}"
 end

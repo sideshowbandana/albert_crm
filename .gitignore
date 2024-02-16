@@ -35,3 +35,6 @@
 /config/master.key
 *~
 .DS_Store
+/user_data/
+/db.sql
+/solution.zip

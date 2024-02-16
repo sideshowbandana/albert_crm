@@ -422,7 +422,7 @@ CREATE INDEX index_email_receipts_on_email_template_id ON public.email_receipts 
 --
 
 ALTER TABLE ONLY public.email_receipts
-    ADD CONSTRAINT fk_rails_bdaf2ac9f2 FOREIGN KEY (contact_id) REFERENCES public.contacts(id);
+    ADD CONSTRAINT fk_rails_bdaf2ac9f2 FOREIGN KEY (contact_id) REFERENCES public.contacts(id) ON DELETE CASCADE;
 
 
 --
@@ -430,7 +430,7 @@ ALTER TABLE ONLY public.email_receipts
 --
 
 ALTER TABLE ONLY public.email_receipts
-    ADD CONSTRAINT fk_rails_f1e12f7d3e FOREIGN KEY (email_template_id) REFERENCES public.email_templates(id);
+    ADD CONSTRAINT fk_rails_f1e12f7d3e FOREIGN KEY (email_template_id) REFERENCES public.email_templates(id) ON DELETE CASCADE;
 
 
 --
@@ -440,6 +440,7 @@ ALTER TABLE ONLY public.email_receipts
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20240215153149'),
 ('20240214231558'),
 ('20240214204905'),
 ('20240212173827'),
