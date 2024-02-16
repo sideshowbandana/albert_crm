@@ -19,7 +19,7 @@ build:
 
 # Run Docker containers
 up: build
-	docker-compose up -d --scale worker=4
+	docker-compose up -d --scale worker=$${WORKERS:-4}
 
 down:
 	docker-compose down
