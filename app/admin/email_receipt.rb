@@ -7,8 +7,12 @@ ActiveAdmin.register EmailReceipt do
   index do
     selectable_column
     id_column
-    column :contact_id
-    column :email_template_id
+    column :contact_id do |receipt|
+      link_to(receipt.contact_id, admin_contact_path(receipt.contact_id))
+    end
+    column :email_template_id do |receipt|
+      link_to(receipt.email_template_id, admin_email_template_path(receipt.email_template_id))
+    end
     column :status
     column :receipt_number
     column :created_at
