@@ -43,6 +43,6 @@ admin: ## Open the Django admin page
 	open http://localhost:3000
 
 submit: ## Dump the Postgres database and package your project into a solution.zip file you can submit
-	zip -r solution.zip .
+	git archive HEAD -o solution.zip
 
 .PHONY: help test build up down sendemails-eager sendemails bash migrate admin submit logs
